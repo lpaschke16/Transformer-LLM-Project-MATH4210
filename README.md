@@ -116,7 +116,7 @@ Worked example. For $z = (2, 1, 0)$ and true class $y = 0$, $p = (0.665, 0.245, 
 Attention needs the general softmax backward pass too, so derive the Jacobian and its vector-Jacobian product, where $g$ is the upstream gradient.
 
 $$
-J = \operatorname{diag}(p) - p\,p^{\top}, \qquad \frac{\partial L}{\partial z} = p \odot \left(g - \langle g, p \rangle \mathbf{1}\right)
+J = \mathrm{diag}(p) - p\,p^{\top}, \qquad \frac{\partial L}{\partial z} = p \odot \left(g - \langle g, p \rangle \mathbf{1}\right)
 $$
 
 **Code.** `softmax` and `softmax_cross_entropy` in `transformer/losses.py`. Subtract the row max before exponentiating, and compute the loss with log-sum-exp. **Test.** Gradient check, plus the worked example. At random initialization the loss should be close to $\ln V$, which is about 4.17 for a 65-character vocabulary.
@@ -136,7 +136,7 @@ $$
 **Derive the forward pass.** $M$ is the causal mask, 0 on and below the diagonal and $-\infty$ above it, so position $t$ only sees positions up to $t$.
 
 $$
-Q = XW_Q,\; K = XW_K,\; V = XW_V, \qquad S = \frac{QK^{\top}}{\sqrt{d_k}} + M, \qquad A = \operatorname{softmax}_{\text{rows}}(S), \qquad O = AV
+Q = XW_Q,\; K = XW_K,\; V = XW_V, \qquad S = \frac{QK^{\top}}{\sqrt{d_k}} + M, \qquad A = \mathrm{softmax}_{\text{rows}}(S), \qquad O = AV
 $$
 
 Why divide by $\sqrt{d_k}$. If the entries of $q$ and $k$ are independent with mean 0 and variance 1, then $q \cdot k$ is a sum of $d_k$ such products and has variance $d_k$. Dividing by $\sqrt{d_k}$ brings it back to variance 1, which keeps the softmax away from a near one-hot output where its gradient vanishes. Write this proof out for the presentation.
@@ -146,7 +146,7 @@ Worked example with 3 tokens and $d_k = 2$. Let $Q = K = V$ have rows $(1, 0)$, 
 **Derive the backward pass.** Given $dO$, apply Step 1 and Step 2 in reverse order.
 
 $$
-dV = A^{\top} dO, \quad dA = dO\,V^{\top}, \quad dS = A \odot \left(dA - \operatorname{rowsum}(dA \odot A)\right), \quad dQ = \frac{dS\,K}{\sqrt{d_k}}, \quad dK = \frac{dS^{\top} Q}{\sqrt{d_k}}
+dV = A^{\top} dO, \quad dA = dO\,V^{\top}, \quad dS = A \odot \left(dA - \mathrm{rowsum}(dA \odot A)\right), \quad dQ = \frac{dS\,K}{\sqrt{d_k}}, \quad dK = \frac{dS^{\top} Q}{\sqrt{d_k}}
 $$
 
 Masked entries have $A = 0$, so they get zero gradient automatically. Then push $dQ$, $dK$ and $dV$ through the three projections with the Step 1 formulas, and sum the three contributions to $dX$.
