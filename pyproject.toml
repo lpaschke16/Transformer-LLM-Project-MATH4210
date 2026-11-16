@@ -1,0 +1,9 @@
+[project]
+name = "math4210-transformer"
+version = "0.1.0"
+description = "A transformer and a small character-level language model built from scratch in NumPy"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+pythonpath = [".", "tests"]
+testpaths = ["tests"]
